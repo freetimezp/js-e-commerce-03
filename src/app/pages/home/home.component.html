@@ -6,7 +6,12 @@
     <app-products-header (columnsCountChange)="onColumnsCountChamge($event)"></app-products-header>
     <mat-grid-list gutterSize="16" [cols]="cols" [rowHeight]="rowHeight">
       <mat-grid-tile>
-        <app-product-box [ngClass]="{'w-full': cols === 1}"  [fullWidthMode]="cols === 1"></app-product-box>
+        <app-product-box 
+          [ngClass]="{'w-full': cols === 1}"  
+          [fullWidthMode]="cols === 1"
+          (addToCart)="onAddToCart($event)"
+        >
+        </app-product-box>
       </mat-grid-tile>
     </mat-grid-list>
   </mat-drawer-content>
