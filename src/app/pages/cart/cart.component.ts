@@ -29,12 +29,15 @@ export class CartComponent implements OnInit {
   ];
 
   constructor(private cartService: CartService, private http: HttpClient) { }
+  handler:any = null;
+
 
   ngOnInit(): void {
     this.cartService.cart.subscribe((_cart: Cart) => {
       this.cart = _cart;
       this.dataSource = this.cart.items;
     });
+    this.loadStripe();
   }
 
   getTotal(items: Array<CartItem>): number {
@@ -57,6 +60,7 @@ export class CartComponent implements OnInit {
     this.cartService.removeQuantity(item);
   }
 
+  //for local stripe checkout
   onCheckout(): void {
     this.http.post('http://localhost:4242/checkout', {
       items: this.cart.items
@@ -68,4 +72,45 @@ export class CartComponent implements OnInit {
     });
   }
 
+
+  //for online stripe checkout
+  pay(amount: any): void {
+    var handler = (<any>window).StripeCheckout.configure({
+      key: 'pk_test_51LefgQDPAfLGIsDnKSAzk6wz0foRt6xpAV7WAVXe74rMplMOCxiMrTc7tWzLhibr57XgbwWtZLS0LlwCHoNosF1J00wwHrORNH',
+      locale: 'auto',
+      token: function (token: any) {
+        // You can access the token ID with `token.id`.
+        // Get the token ID to your server-side code for use.
+        alert('We get your payment. Wait a call!');
+      }
+    });
+ 
+    handler.open({
+      name: 'Demo Site',
+      description: '2 widgets',
+      amount: amount * 100,
+    });
+  }
+
+  loadStripe() {
+    if(!window.document.getElementById('stripe-script')) {
+      var s = window.document.createElement("script");
+      s.id = "stripe-script";
+      s.type = "text/javascript";
+      s.src = "https://checkout.stripe.com/checkout.js";
+      s.onload = () => {
+        this.handler = (<any>window).StripeCheckout.configure({
+          key: 'pk_test_51LefgQDPAfLGIsDnKSAzk6wz0foRt6xpAV7WAVXe74rMplMOCxiMrTc7tWzLhibr57XgbwWtZLS0LlwCHoNosF1J00wwHrORNH',
+          locale: 'auto',
+          token: function (token: any) {
+            // You can access the token ID with `token.id`.
+            // Get the token ID to your server-side code for use.
+            alert('Payment Success!!');
+          },
+        });
+      }
+       
+      window.document.body.appendChild(s);
+    }
+  }
 }
